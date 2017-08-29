@@ -111,11 +111,11 @@ int estadoFinal (int estado) {
 
 TOKEN strClasificar (char * t) {
 
-    TOKEN palRes[4+1] = {INICIO,FIN,LEER,ESCRIBIR};
+    char * palRes[4+1] = {"INICIO","FIN","LEER","ESCRIBIR"};
     int i = 0;
 
     for (i;i<4;i++) {
-        if (strcmp (t,palRes[i]) == 0) return palRes[i];
+        if ((strcmp (t,palRes[i])) == 0) return i;
     }
 
     return ID;
