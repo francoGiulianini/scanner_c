@@ -4,7 +4,7 @@
 #define numeroColumnas 12
 
 typedef enum {
-INCIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO,
+INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO,
 PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT,
 ERRORLEXICO
 } TOKEN;
@@ -12,6 +12,7 @@ ERRORLEXICO
 TOKEN scanner(char * s);
 int obtenerColumna(char s);
 int estadoFinal (int estado);
+TOKEN strClasificar (char * s);
 
 int main ( int argc , char * argv [] ) {
 
@@ -71,7 +72,7 @@ TOKEN scanner (char * s) {
     switch (estado) {
 
     case 1: return CONSTANTE;
-    case 2: return 2; /* Aca habria que hacer una funcion que distinga un IDENTIFICADOR de INICIO, FIN, LEER, ESCRIBIR */
+    case 2: return strClasificar (s);
     case 3: return PARENIZQUIERDO;
     case 4: return PARENDERECHO;
     case 5: return PUNTOYCOMA;
@@ -108,48 +109,15 @@ int estadoFinal (int estado) {
 
 }
 
+TOKEN strClasificar (char * t) {
 
+    TOKEN palRes[4+1] = {INICIO,FIN,LEER,ESCRIBIR};
+    int i = 0;
 
+    for (i;i<4;i++) {
+        if (strcmp (t,palRes[i]) == 0) return palRes[i];
+    }
 
+    return ID;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
