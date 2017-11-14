@@ -6,8 +6,39 @@
 #define numeroColumnas 12
 #define TAMLEX 32
 
-FILE * in, out;
+
+void objetivo (void);
+void programa (void);
+void listaDeSentencias (void);
+void sentencia (void);
+void expresion (void);
+void operadorAditivo (void);
+
+void ErrorSintactico(void);
+void ErrorLexico(void);
+void ErrorSemantico(void);
+
+int match (char * c);
+int scanner(char * s);
+int obtenerColumna(char s);
+int estadoFinal (int estado);
+int strClasificar (char * s);
+REG_EXPRESION GenInfijo(REG_EXPRESION e1, char *op, REG_EXPRESION e2);
+
+TOKEN tokenActual;
+int flagToken = 0;
+FILE * in;
+FILE * out;
 char buffer[TAMLEX];
+
+
+static string tablaDeSimbolos [2][50] = {
+	{"inicio", "INICIO"},
+	{"fin", "FIN"},
+	{"leer", "LEER"},
+	{"escribir", "ESCRIBIR"}
+	{"$", "$"}
+}
 
 typedef struct{
 	TOKEN clase;
@@ -16,42 +47,52 @@ typedef struct{
 } REG_EXPRESION;
 
 typedef enum {
-INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO,
-PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT,
-ERRORLEXICO,ERROR
+	INICIO,
+	FIN,
+	LEER,
+	ESCRIBIR, 
+	ID, 
+	CONSTANTE, 
+	PARENIZQUIERDO,
+	PARENDERECHO, 
+	PUNTOYCOMA, 
+	COMA, 
+	ASIGNACION, 
+	SUMA, 
+	RESTA, 
+	FDT
 } TOKEN;
-
-TOKEN tokenActual;
-int flagToken = 0;
-
-int scanner(char * s);
-int obtenerColumna(char s);
-int estadoFinal (int estado);
-int strClasificar (char * s);
 
 int main ( int argc , char * argv [] ) {
 
 
 	
     if (argc == 1) {
-        printf ("Debe ingresar el programa fuente a compilar\n");
+        printf ("Debe ingresar los archivos de entrada y salida");
         return -1;
     }
 
     if (argc != 2) {
-        printf ("Debe ingresar el numero correcto de argumentos\n");
+        printf ("Debe ingresar el numero correcto de argumentos");
         return -2;
     }
 	
 	if ((in = fopen(argv[1],"r") == NULL){
-		printf("No se puede abrir archivo de lectura\n");
+		printf("No se puede abrir archivo de lectura");
 		return -3;
 	}
 	
 	if((out = fopen(arg[2],"w")) == NULL){
-		printf("No se pudo abrir archivo de salida\n");
+		printf("No se pudo abrir archivo de salida");
 		return -4;
 	}
+	if (!(terminaCorrecto(argv[1])) {
+		printf("El archivo de entrada debe terminar en .m");
+		return -5;						
+	}
+	
+	objetivo();
+	/*proceso pasar de mini al otro lenguaje*/
 	
 	return 0;
 }	
@@ -91,7 +132,7 @@ void Sentencia(void){
 			Match(ESCRIBIR) ; Match(PARENIZQUIERDO); ListaExpresiones(); Match(PARENDERECHO); Match(PUNTOYCOMA);
 		break;
 		default:
-			ErrorSintactico(tok);
+			ErrorSintactico();
 		break;
 	}
 }
@@ -108,7 +149,7 @@ void Expresion (void){
 void OperadorAditivo(void){
 	TOKEN t = ProximoToken();
 	if( t == SUMA || t == RESTA) Match(t);
-	else ErrorSintactico(t);
+	else ErrorSintactico();
 }
 void Primaria(REG_EXPRESION * Presul){
 	TOKEN tok = ProximoToken();
@@ -142,10 +183,7 @@ void ListaIdentificadores(void){
 		Leer(reg);
 	}
 }	
-	
-
 	switch (scanner (argv [1])) {
-
 	case INICIO: printf("%s", "El Token es una Palabra reservada."); break;
     case ESCRIBIR: printf("%s", "El Token es una Palabra reservada."); break;
     case LEER: printf("%s", "El Token es una Palabra reservada.") ; break;
@@ -161,22 +199,15 @@ void ListaIdentificadores(void){
     case RESTA: printf("%s", "El Token es un Operador.") ; break;
 	case ERROR: printf("ERROR: Esta palabra NO pertenece al lenguaje micro\n"); break;
 	}
-	
 	while(fgets(linea,TIMELIN + 1, in)) fputs(linea,out);
-	
 	fclose(in);
 	fclose(out);
-		
-
     return 0;
 }
 
 int scanner (char * s) {
-
     int tabla [numeroEstados][numeroColumnas] = {
-
 /*   | Digito | Letra | (  |  ) | ;  |  , | :  |  = | +  |  - | Espacio | Otros |   */
-
      {   1    ,   2   , 3  , 4  , 5  , 6  , 7  , 11 , 8  , 9  ,   0     ,   11  },
      {   1    ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
      {   2    ,   2   , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
@@ -189,27 +220,19 @@ int scanner (char * s) {
      {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
      {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
      {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  }, /* Estado 11: Palabra que no pertenece al lenguaje micro */
-
     };
-
     int i = 0;
     int estado = 0;
     int columna;
-
     while ( (s[i] != '\0') && (estado != 11) ) {
-
         columna = obtenerColumna (s[i]);
         estado = tabla [estado][columna];
-
         i++;
     };
-
-    if(!estadoFinal(estado) || i>32) {
+    if(!estadoFinal(estado) || i>TAMLEX) {
          return ERROR;
     }
-
     switch (estado) {
-
     case 1: return CONSTANTE;
     case 2: return (strClasificar (s));
     case 3: return PARENIZQUIERDO;
@@ -219,13 +242,10 @@ int scanner (char * s) {
     case 8: return SUMA;
     case 9: return RESTA;
     case 10: return ASIGNACION;
-
     }
-
-};
+}
 
 int obtenerColumna (char c) {
-
     if ( isdigit(c) ) return 0;
     if ( isalpha(c) ) return 1;
     if ( c == '(' ) return 2;
@@ -238,31 +258,24 @@ int obtenerColumna (char c) {
     if ( c == '-' ) return 9;
     if ( isspace(c) ) return 10;
     return 11;
-
 }
 
 int estadoFinal (int estado) {
-
-    if ((estado == 1) || (estado == 2) || (estado == 3) || (estado == 4) || (estado == 5) || (estado == 6) || (estado == 8) || (estado == 9) || (estado == 10)) return 1;
-    return 0;
-
+    if ((estado != 7) && (estado != 11) return 0;
+    return 1;0
 }
 
 int strClasificar (char * t) {
-
-    char palRes[4][8+1] = {"INICIO","FIN","LEER","ESCRIBIR"};
+    char palRes[4] = {"INICIO","FIN","LEER","ESCRIBIR"};
     int i = 0;
-
     for (i;i<4;i++) {
         if ((strcmp (t,palRes[i])) == 0) return i;
     }
-
     return ID;
-
 }
 
 void Match( TOKEN t){
-	if (!t == ProximoToken()) ErrorSintactico();
+	if (!(t == ProximoToken())) ErrorSintactico();
 	flagToken = 0;
 }
 
@@ -306,4 +319,16 @@ REG_EXPRESION GenInfijo(REG_EXPRESION e1, char *op, REG_EXPRESION e2){
 	Generar(cadOp,Extraer(&e1),Extraer(&e2),cadTemp);
 	stpcpy(reg.nombre,cadTemp);
 	return reg;
+}
+void ErrorLexico(void) {
+	printf ("Hubo error de tipo lexico");
+	return -100;
+}
+void ErrorSemantico(void) {
+	printf ("Hubo error de tipo semantico");
+	return -101;
+}
+void ErrorSintactico(void) {
+	printf ("Hubo error de tipo sintactico");
+	return -102;
 }
