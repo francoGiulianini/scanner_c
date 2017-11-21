@@ -6,6 +6,28 @@
 #define numeroColumnas 12
 #define TAMLEX 32
 
+typedef enum {
+	INICIO,
+	FIN,
+	LEER,
+	ESCRIBIR,
+	ID,
+	CONSTANTE,
+	PARENIZQUIERDO,
+	PARENDERECHO,
+	PUNTOYCOMA,
+	COMA,
+	ASIGNACION,
+	SUMA,
+	RESTA,
+	FDT
+} TOKEN;
+
+typedef struct {
+	TOKEN clase;
+	char nombre[TAMLEX];
+	int valor;
+} REG_EXPRESION;
 
 void objetivo (void);
 void programa (void);
@@ -31,42 +53,23 @@ FILE * in;
 FILE * out;
 char buffer[TAMLEX];
 
+typedef struct {
+    char lexema [TAMLEX];
+    TOKEN token;
+    } registroTabla;
 
-static string tablaDeSimbolos [2][50] = {
+ registroTabla tablaDeSimbolos [50] = {
 	{"inicio", "INICIO"},
 	{"fin", "FIN"},
 	{"leer", "LEER"},
 	{"escribir", "ESCRIBIR"}
 	{"$", "$"}
-}
-
-typedef struct{
-	TOKEN clase;
-	char nombre[TAMLEX];
-	int valor;
-} REG_EXPRESION;
-
-typedef enum {
-	INICIO,
-	FIN,
-	LEER,
-	ESCRIBIR, 
-	ID, 
-	CONSTANTE, 
-	PARENIZQUIERDO,
-	PARENDERECHO, 
-	PUNTOYCOMA, 
-	COMA, 
-	ASIGNACION, 
-	SUMA, 
-	RESTA, 
-	FDT
-} TOKEN;
+};
 
 int main ( int argc , char * argv [] ) {
 
 
-	
+
     if (argc == 1) {
         printf ("Debe ingresar los archivos de entrada y salida");
         return -1;
@@ -76,26 +79,28 @@ int main ( int argc , char * argv [] ) {
         printf ("Debe ingresar el numero correcto de argumentos");
         return -2;
     }
-	
+
 	if ((in = fopen(argv[1],"r") == NULL){
 		printf("No se puede abrir archivo de lectura");
 		return -3;
 	}
-	
-	if((out = fopen(arg[2],"w")) == NULL){
+
+	if((out = fopen(,"w")) == NULL){
 		printf("No se pudo abrir archivo de salida");
 		return -4;
 	}
 	if (!(terminaCorrecto(argv[1])) {
 		printf("El archivo de entrada debe terminar en .m");
-		return -5;						
+		return -5;
 	}
-	
+
 	objetivo();
 	/*proceso pasar de mini al otro lenguaje*/
-	
-	return 0;
-}	
+
+	fclose(in);
+	fclose(out);
+    return 0;
+}
 void Objetivo(void){
 		Programa();
 		Match(FDT);
@@ -116,7 +121,7 @@ void ListaSentencias(void){
 			default:
 			return;
 		}
-	}	
+	}
 }
 
 void Sentencia(void){
@@ -173,53 +178,36 @@ void Primaria(REG_EXPRESION * Presul){
 void ListaIdentificadores(void){
 	TOKEN t;
 	REG_EXPRESION reg;
-	
+
 	identificador(&reg);
 	Leer(reg);
-	
+
 	for(t=ProximoToken(); t == COMA ; t = ProximoToken()){
 		Match(COMA);
 		identificador(&reg);
 		Leer(reg);
 	}
-}	
-	switch (scanner (argv [1])) {
-	case INICIO: printf("%s", "El Token es una Palabra reservada."); break;
-    case ESCRIBIR: printf("%s", "El Token es una Palabra reservada."); break;
-    case LEER: printf("%s", "El Token es una Palabra reservada.") ; break;
-    case FIN: printf("%s", "El Token es una Palabra reservada.") ; break;
-    case ID: printf("%s", "El Token es un Identificador.") ; break;
-    case CONSTANTE: printf("%s", "El Token es una Constante.") ; break;
-    case PARENIZQUIERDO: printf("%s", "El Token es un Caracter de puntuacion."); break;
-    case PARENDERECHO: printf("%s", "El Token es un Caracter de puntuacion.") ; break;
-    case PUNTOYCOMA: printf("%s", "El Token es un Caracter de puntuacion.") ; break;
-	case COMA: printf("%s", "El Token es una Caracter de puntuacion.") ; break;
-	case ASIGNACION: printf("%s", "El Token es Asignacion.") ; break;
-	case SUMA: printf("%s", "El Token es un Operador.") ; break;
-    case RESTA: printf("%s", "El Token es un Operador.") ; break;
-	case ERROR: printf("ERROR: Esta palabra NO pertenece al lenguaje micro\n"); break;
-	}
-	while(fgets(linea,TIMELIN + 1, in)) fputs(linea,out);
-	fclose(in);
-	fclose(out);
-    return 0;
 }
+
 
 int scanner (char * s) {
     int tabla [numeroEstados][numeroColumnas] = {
-/*   | Digito | Letra | (  |  ) | ;  |  , | :  |  = | +  |  - | Espacio | Otros |   */
-     {   1    ,   2   , 3  , 4  , 5  , 6  , 7  , 11 , 8  , 9  ,   0     ,   11  },
-     {   1    ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   2    ,   2   , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 10 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  },
-     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11  }, /* Estado 11: Palabra que no pertenece al lenguaje micro */
+/*   | Digito | Letra | (  |  ) | ;  |  , | :  |  = | +  |  - | Espacio | Otros | FDT |  */
+     {   1    ,   2   , 3  , 4  , 5  , 6  , 7  , 11 , 8  , 9  ,   0     ,   11   ,    },
+     {   1    ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   2    ,   2   , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 10 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    },
+     {   11   ,   11  , 11 , 11 , 11 , 11 , 11 , 11 , 11 , 11 ,   11    ,   11   ,    }, /* Estado 11: Palabra que no pertenece al lenguaje micro */
     };
     int i = 0;
     int estado = 0;
@@ -261,8 +249,8 @@ int obtenerColumna (char c) {
 }
 
 int estadoFinal (int estado) {
-    if ((estado != 7) && (estado != 11) return 0;
-    return 1;0
+    if ((estado != 7) && (estado != 11)) return 0;
+    return 1;
 }
 
 int strClasificar (char * t) {
@@ -288,13 +276,13 @@ TOKEN ProximoToken(){
 	}
 		return tokenActual;
 }
-	
+
 void listaDeExpresiones(void){
 	TOKEN t;
 	REG_EXPRESION reg;
 	EXPRESIONES(&reg);
 	Escribir(reg);
-	
+
 	for(t = ProximoToken();t == COMA; t = ProximoToken()){
 		Match(COMA);
 		Expresion(&reg);

@@ -8,13 +8,13 @@
 typedef enum {
 INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO,
 PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT,
-ERRORLEXICO,ERROR
+ERRORLEXICO
 } TOKEN;
 
-int scanner(char * s);
+TOKEN scanner(char * s);
 int obtenerColumna(char s);
 int estadoFinal (int estado);
-int strClasificar (char * s);
+TOKEN strClasificar (char * s);
 
 int main ( int argc , char * argv [] ) {
 
@@ -29,31 +29,32 @@ int main ( int argc , char * argv [] ) {
         printf ("Debe ingresar el numero correcto de argumentos\n");
         return -2;
     }
-	
+
 	switch (scanner (argv [1])) {
 
-	case INICIO: printf("%s", "El Token es una Palabra reservada."); break;
-    case ESCRIBIR: printf("%s", "El Token es una Palabra reservada."); break;
-    case LEER: printf("%s", "El Token es una Palabra reservada.") ; break;
-    case FIN: printf("%s", "El Token es una Palabra reservada.") ; break;
-    case ID: printf("%s", "El Token es un Identificador.") ; break;
-    case CONSTANTE: printf("%s", "El Token es una Constante.") ; break;
-    case PARENIZQUIERDO: printf("%s", "El Token es una Palabra reservada."); break;
-    case PARENDERECHO: printf("%s", "El Token es una Palabra reservada.") ; break;
-    case PUNTOYCOMA: printf("%s", "El Token es una Palabra reservada.") ; break;
-	case COMA: printf("%s", "El Token es una Caracter de puntuación.") ; break;
-	case ASIGNACION: printf("%s", "El Token es un Operador.") ; break;
-	case SUMA: printf("%s", "El Token es un Operador.") ; break;
-    case RESTA: printf("%s", "El Token es un Operador.") ; break;
-	case ERROR: printf("ERROR: Esta palabra NO pertenece al lenguaje micro\n"); break;
+	case INICIO: printf("El Token es una Palabra reservada.\n");
+    case ESCRIBIR: printf("%s", "El Token es una Palabra reservada.\n");
+    case LEER: printf("%s", "El Token es una Palabra reservada.\n") ;
+    case FIN: printf("%s", "El Token es una Palabra reservada.\n") ;
+    case ID: printf("%s", "El Token es un Identificador.\n") ;
+    case CONSTANTE: printf("%s", "El Token es una Constante.") ;
+    case PARENIZQUIERDO: printf("%s", "El Token es una Palabra reservada.\n");
+    case PARENDERECHO: printf("%s", "El Token es una Palabra reservada.\n") ;
+    case PUNTOYCOMA: printf("%s", "El Token es una Palabra reservada.\n") ;
+	case COMA: printf("%s", "El Token es una Caracter de puntuación.\n") ;
+	case ASIGNACION: printf("%s", "El Token es un Operador.\n") ;
+	case SUMA: printf("%s", "El Token es un Operador.\n") ;
+    case RESTA: printf("%s", "El Token es un Operador.\n") ;
+    case 99: printf("ERROR: Esta palabra NO pertenece al lenguaje micro.\n");
+
 	}
-	
+
 
 
     return 0;
 }
 
-int scanner (char * s) {
+TOKEN scanner (char * s) {
 
     int tabla [numeroEstados][numeroColumnas] = {
 
@@ -87,7 +88,7 @@ int scanner (char * s) {
     };
 
     if(!estadoFinal(estado) || i>32) {
-         return ERROR;
+         return 99;
     }
 
     switch (estado) {
