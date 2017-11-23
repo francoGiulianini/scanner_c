@@ -33,15 +33,17 @@ ESCRIBIR}, {"$", 99} };
 
 
 
-char buffer[longLexema];  /*se guardan las cadenas de letras y/o numeros para diferenciar palabras reservadas de identificadores y verificar si ya fueron declarados en la TS*/
-FILE* in;                 /*Flujo de Entrada*/
-TOKEN tokenActual;        /* variable en la que se guarda el token que se esta usando*/
-int flagToken = 0;        /*este flag se encarga de garantizar que no se busque un nuevo token hasta que se haya usado en el analisis sintactico*/
+char buffer[longLexema];  /* se guardan las cadenas de letras y/o numeros para diferenciar palabras reservadas de identificadores y verificar si ya fueron declarados en la TS */
+FILE * in;                /* Flujo de Entrada */
+FILE * Fout;              /* Flujo de Salida */
+TOKEN tokenActual;        /* variable en la que se guarda el token que se esta usando */
+int flagToken = 0;        /* este flag se encarga de garantizar que no se busque un nuevo token hasta que se haya usado en el analisis sintactico */
 int numTemp = 1;
 
 
 /* prototipos */
 int verificarFormato(char * c);
+char * nombreArchivoSalida(char * c);
 TOKEN scanner(void);
 void objetivo(void);
 void programa(void);
@@ -61,8 +63,8 @@ void chequear(char* s);
 void match(TOKEN t);
 void errorLexico(void);
 void errorSintactico(void);
-void generar(char * opCode, char * arg1, char * arg2, char * arg3);
-char * extraer(reg_expresion* regTSistro);
+void generar(char * codigoOp, char * arg1, char * arg2, char * arg3);
+char * extraer(reg_expresion* punteroreg);
 void comenzar(void);
 void terminar(void);
 void leer(reg_expresion in);
@@ -79,7 +81,7 @@ int main(int argc, char * argv[])
 
 char fNombre[longNombre];
 
-/*validaciones*/
+/* validaciones */
 
 if ( argc == 1 )
 {
@@ -102,17 +104,33 @@ if (!verificarFormato(fNombre))
 
 if ( (in = fopen(fNombre, "r") ) == NULL )
 {
-    printf("No se pudo abrir el archivo\n");
+    printf("No se pudo abrir el archivo a leer\n");
     return -4;
+}
+
+if ( (Fout = fopen(nombreArchivoSalida(fNombre), "w") ) == NULL )
+{
+    printf("No se pudo abrir el archivo de salida\n");
+    return -5;
 }
 
 /*empieza la ejecucion del compilador*/
 objetivo();
 
-/*terminada la ejecucion, cierro el flujo de entrada*/
+/*terminada la ejecucion, cierro los flujos de entrada y salida*/
 fclose(in);
+fclose(Fout);
 
 return 0;
+}
+
+char * nombreArchivoSalida(char * c)
+{
+    int i = 0;
+    while(c[i] != '\0') i++;
+    c[i-1] = '\0';
+    strcat(c, "obj");
+    return c;
 }
 
 /* esta funcion verifica que el nombre del archivo a compilar termine en .m */
@@ -165,14 +183,11 @@ void sentencia(void)
    switch(tok)
    {
    case ID: /*<sentencia> -> <identificador> := <expresion> #asignar PUNTOYCOMA */
-    identificador(&izq); match(ASIGNACION); expresion(&der);asignar(izq,der); match(PUNTOYCOMA);
-    break;
+    identificador(&izq); match(ASIGNACION); expresion(&der);asignar(izq,der); match(PUNTOYCOMA); break;
    case LEER: /*<sentencia> -> LEER PARENIZQUIERDO <listaIdentificadores> PARENDERECHO PUNTOYCOMA */
-    match(LEER); match(PARENIZQUIERDO); listaIdentificadores(); match(PARENDERECHO); match(PUNTOYCOMA);
-    break;
+    match(LEER); match(PARENIZQUIERDO); listaIdentificadores(); match(PARENDERECHO); match(PUNTOYCOMA); break;
    case ESCRIBIR: /*<sentencia> -> ESCRIBIR PARENIZQUIERDO <listaExpresiones> PARENDERECHO PUNTOYCOMA */
-    match(ESCRIBIR);match(PARENIZQUIERDO); listaExpresiones(); match(PARENDERECHO); match(PUNTOYCOMA);
-    break;
+    match(ESCRIBIR);match(PARENIZQUIERDO); listaExpresiones(); match(PARENDERECHO); match(PUNTOYCOMA); break;
    default:
     errorSintactico();break;
    }
@@ -348,6 +363,7 @@ if ( i < cantRegTS ) {
 void generar(char * codigoOp, char * arg1, char * arg2, char * arg3)
 {
    printf("%s, %s, %s, %s \n", codigoOp, arg1, arg2, arg3);
+   fprintf(Fout, "%s, %s, %s, %s \n", codigoOp, arg1, arg2, arg3);
 }
 
 /* Retorna la cadena(nombre) del registro semantico */
