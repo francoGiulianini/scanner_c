@@ -2,11 +2,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#define longLexema 32+1          /*longitud maxima permitida de un lexema*/
-#define longNombre 35+1          /*longitud maxima del nombre del archivo .m*/
-#define cantEstados 15           /*cantidad de estados del AFD del scanner*/
-#define cantColumnas 13          /*cantidad de columnas del AFD del scanner*/
-#define cantRegTS 250           /*cantidad de registros que hay en la Tabla de Simbolos*/
+#define longLexema 32+1          /*longitud maxima permitida de un lexema */
+#define longNombre 35+1          /*longitud maxima del nombre del archivo */
+#define cantEstados 15           /*cantidad de estados del AFD del scanner */
+#define cantColumnas 13          /*cantidad de columnas del AFD del scanner */
+#define cantRegTS 250            /*cantidad de registros que hay en la Tabla de Simbolos */
 
 typedef enum
 {
@@ -38,12 +38,15 @@ FILE * in;                /* Flujo de Entrada */
 FILE * Fout;              /* Flujo de Salida */
 TOKEN tokenActual;        /* variable en la que se guarda el token que se esta usando */
 int flagToken = 0;        /* este flag se encarga de garantizar que no se busque un nuevo token hasta que se haya usado en el analisis sintactico */
-int numTemp = 1;
+int numTemp = 1;          /* numero de variable temporal */
+int errorL = 0;           /* flag de error lexico */
+int errorS = 0;           /* flag de error sintactico */
 
 
 /* prototipos */
 int verificarFormato(char * c);
 char * nombreArchivoSalida(char * c);
+void avisoErrores(void);
 TOKEN scanner(void);
 void objetivo(void);
 void programa(void);
@@ -65,7 +68,7 @@ void errorLexico(void);
 void errorSintactico(void);
 void generar(char * codigoOp, char * arg1, char * arg2, char * arg3);
 char * extraer(reg_expresion* punteroreg);
-void comenzar(void);
+void comentario(void);
 void terminar(void);
 void leer(reg_expresion in);
 void escribir(reg_expresion out);
@@ -78,8 +81,6 @@ reg_expresion genInfijo(reg_expresion e1,char* op,reg_expresion e2);
 
 int main(int argc, char * argv[])
 {
-
-char fNombre[longNombre];
 
 /* validaciones */
 
@@ -94,43 +95,38 @@ if ( argc != 2 )
     return -2;
 }
 
-strcpy(fNombre, argv[1]);
-
-if (!verificarFormato(fNombre))
+if (!verificarFormato(argv[1]))
 {
     printf ("El formato del archivo no es el adecuado (asegurese de que sea un archivo .m)\n");
     return -3;
 }
 
-if ( (in = fopen(fNombre, "r") ) == NULL )
+if ( (in = fopen(argv[1], "r") ) == NULL )
 {
     printf("No se pudo abrir el archivo a leer\n");
     return -4;
 }
 
-if ( (Fout = fopen(nombreArchivoSalida(fNombre), "w") ) == NULL )
+if ( (Fout = fopen(nombreArchivoSalida(argv[1]), "w") ) == NULL )
 {
     printf("No se pudo abrir el archivo de salida\n");
     return -5;
 }
 
+comentario();
+
 /*empieza la ejecucion del compilador*/
+
 objetivo();
 
+avisoErrores(); /*hace un comentario por pantalla si hubo errores sintacticos o lexicos durante la compilacion*/
+
 /*terminada la ejecucion, cierro los flujos de entrada y salida*/
+
 fclose(in);
 fclose(Fout);
 
 return 0;
-}
-
-char * nombreArchivoSalida(char * c)
-{
-    int i = 0;
-    while(c[i] != '\0') i++;
-    c[i-1] = '\0';
-    strcat(c, "obj");
-    return c;
 }
 
 /* esta funcion verifica que el nombre del archivo a compilar termine en .m */
@@ -142,6 +138,20 @@ int verificarFormato(char * c)
     return 0;
 }
 
+char * nombreArchivoSalida(char * c)
+{
+    int i = 0;
+    while(c[i] != '\0') i++;
+    c[i-1] = '\0';
+    strcat(c, "obj");
+    return c;
+}
+
+void avisoErrores(void)
+{
+    if( errorL != 0 ) printf ("\n\nHubo %d error/es lexico/s durante el proceso de compilacion. Reviselos\n" , errorL);
+    if( errorS != 0 ) printf ("\n\nHubo %d error/es sintactico/s durante el proceso de compilacion. Reviselos\n" , errorS);
+}
 /* <objetivo> -> <programa> FDT #terminar */
 void objetivo(void)
 {
@@ -150,10 +160,9 @@ void objetivo(void)
   terminar();
 }
 
-/* <programa> -> #comenzar INICIO <listaSentencias> FIN */
+/* <programa> -> INICIO <listaSentencias> FIN */
 void programa(void)
 {
-    comenzar();
     match(INICIO);
     listaSentencias();
     match(FIN);
@@ -372,9 +381,9 @@ char * extraer(reg_expresion* punteroreg)
 return (*punteroreg).nombre;
 }
 
-void comenzar(void) /*inicializacion semantica*/
+void comentario(void)
 {
-    printf("Instrucciones para la maquina virtual\n");
+    printf("A continuacion se muestran las instrucciones generadas para la MV\n(las mismas se guardan tambien en un archivo del mismo nombre que el programa a compilar, con extension .obj):\n\n");
 }
 void terminar(void)
 {
@@ -514,11 +523,15 @@ return 12;
 void errorLexico(void)
 {
     printf("Error lexico\n");
+
+    errorL++;
 }
 
 void errorSintactico()
 {
-printf("Error Sintactico\n");
+    printf("Error Sintactico\n");
+
+    errorS++;
 }
 
 
