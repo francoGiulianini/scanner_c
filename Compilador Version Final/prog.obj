@@ -1,0 +1,8 @@
+declara, a, Entera,  
+declara, bb, Entera,  
+declara, Temp&1, Entera,  
+Resta, bb, 34, Temp&1 
+declara, Temp&2, Entera,  
+Suma, Temp&1, a, Temp&2 
+almacena, Temp&2, a,  
+Finalizar, , ,  
